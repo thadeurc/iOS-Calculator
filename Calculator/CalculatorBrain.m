@@ -45,6 +45,14 @@
     else if([@"*" isEqualToString:operation]){
         result = [self popOperand] * [self popOperand];
     }
+    else if([@"-" isEqualToString:operation]){
+        double leftOperand = [self popOperand];
+        result = [self popOperand] - leftOperand;
+    }
+    else if([@"/" isEqualToString:operation]){
+        double leftOperand = [self popOperand];
+        result = [self popOperand] / leftOperand;
+    }
     [self pushOperand:result];
     return result;
 }
