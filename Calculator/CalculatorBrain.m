@@ -10,12 +10,17 @@
 
 @interface CalculatorBrain()
 @property (nonatomic, strong) NSMutableArray *operandStack;
+- (double) toRadians: (double) degrees;
 @end
 
 
 @implementation CalculatorBrain
 
 @synthesize operandStack = _operandStack;
+
+- (double) toRadians: (double) degrees {
+    return degrees * M_PI / 180;
+}
 
 - (NSMutableArray *) operandStack {
     if(!_operandStack){
@@ -53,8 +58,27 @@
         double leftOperand = [self popOperand];
         result = [self popOperand] / leftOperand;
     }
+    else if([@"sin" isEqualToString:operation]){
+        double operand = [self toRadians: [self popOperand]];
+        result = sin(operand);
+    }
+    else if([@"cos" isEqualToString:operation]){
+        double operand = [self toRadians: [self popOperand]];
+        result = cos(operand);
+    }
+    else if([@"sqrt" isEqualToString:operation]){
+        double operand = [self popOperand];
+        result = sqrt(operand);
+    }
+    else if([@"∏" isEqualToString:operation]){
+        result = M_PI;
+    }
     [self pushOperand:result];
     return result;
+}
+
+- (void) clearOperands {
+    [self.operandStack removeAllObjects];
 }
 
 
