@@ -14,7 +14,7 @@
 @property (nonatomic) BOOL userIsInTheMiddleOfEnteringNumber;
 @property (nonatomic) BOOL numberAlreadyHasDot;
 @property (nonatomic, strong) CalculatorBrain *brain;
-- (void) appendToHistory: (NSString *) text;
+- (void) appendToHistory: (NSString *) text: (BOOL)useEquals;
 - (void) clearHistory;
 - (void) clearDisplay;
 
@@ -34,11 +34,13 @@
 
 - (void) clearDisplay {
     self.display.text = @"0";
+    self.userIsInTheMiddleOfEnteringNumber = NO;
 }
 
-- (void) appendToHistory:(NSString *)text {
-    NSString *newText = [self.history.text stringByAppendingFormat: @" %@", text];
-    if(newText.length > 30){
+- (void) appendToHistory:(NSString *)text: (BOOL) useEquals {
+    NSString *pattern = useEquals ? @" %@ =" : @" %@";
+    NSString *newText = [self.history.text stringByAppendingFormat: pattern, text];
+    if(newText.length > 50){
         newText = text;
     }
     self.history.text = newText;
@@ -68,7 +70,7 @@
         [self enterPressed];
     }
     double result = [self.brain performOperation: sender.currentTitle];    
-    [self appendToHistory: sender.currentTitle];
+    [self appendToHistory: sender.currentTitle : YES];
     NSString *resultAsString = [NSString stringWithFormat:@"%g", result];
     self.display.text = resultAsString;
     NSRange range = [resultAsString rangeOfString: @"."];
@@ -78,7 +80,7 @@
 - (IBAction)enterPressed {
     double value = [self.display.text doubleValue];
     [self.brain pushOperand:value];
-    [self appendToHistory: self.display.text];    
+    [self appendToHistory: self.display.text : NO];    
     self.userIsInTheMiddleOfEnteringNumber = NO;    
 }
 
@@ -94,6 +96,20 @@
     [self clearHistory];
     [self clearDisplay];
     [self.brain clearOperands];
+}
+
+- (IBAction)backspacePressed {
+    NSString *text = self.display.text;
+    if(text.length == 1){
+        self.display.text = @"0";
+        self.numberAlreadyHasDot = NO;
+        self.userIsInTheMiddleOfEnteringNumber = NO;
+    }
+    else{
+        text = [text substringToIndex: text.length - 1];
+        self.display.text = text;
+        self.numberAlreadyHasDot = [text rangeOfString: @"."].length != 0;
+    }
 }
 
 @end
